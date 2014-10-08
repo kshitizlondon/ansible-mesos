@@ -1,0 +1,5 @@
+---
+# ntp handlers for notifications
+
+- name: restart ntp
+  service: name=ntp state=restarted

@@ -1,0 +1,7 @@
+[tag_layer_mesos-master]
+192.168.50.30
+
+[tag_layer_mesos-slave]
+192.168.50.31
+192.168.50.32
+192.168.50.33

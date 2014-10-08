@@ -1,0 +1,4 @@
+---
+
+- include: layer_mesos-master.yml
+- include: layer_mesos-slave.yml

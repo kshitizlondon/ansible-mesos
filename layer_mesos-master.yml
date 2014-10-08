@@ -1,0 +1,9 @@
+---
+
+- name: LAYER - Mesos-master
+  hosts:
+    - tag_layer_mesos-master
+    - local # for ansible-pull only
+  sudo: yes
+  roles:
+    - mesos

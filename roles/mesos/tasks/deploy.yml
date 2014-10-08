@@ -1,0 +1,73 @@
+---
+
+---
+- name: Install os packages
+  apt: pkg={{item}} state=present update_cache=yes
+  with_items:
+    - wget
+    - curl
+    - g++
+    - gcc
+    - zookeeper-bin
+    - zookeeperd
+    - python-setuptools
+    - python-dev
+    - libcurl4-openssl-dev
+    - libsasl2-2
+    - libsasl2-dev
+    - libcurl3
+
+- name: "Copy the apt source"
+  shell: sh -c "echo deb http://repos.mesosphere.io/ubuntu {{ ansible_distribution_release }} main > /etc/apt/sources.list.d/mesosphere.list"
+  args:
+    creates: /etc/apt/sources.list.d/mesosphere.list
+  register: mesosphere_aptsource_installed
+
+- debug: msg="{{ mesosphere_aptsource_installed }}"
+
+- name: "Get the mesos apt-key"
+  shell: sudo apt-key adv --keyserver keyserver.ubuntu.com --recv E56151BF
+  when: mesosphere_aptsource_installed.changed
+
+- name: "run an apt-get update"
+  apt: update_cache=yes 
+  when: mesosphere_aptsource_installed.changed
+
+- name: "Install latest Mesos"
+  apt: name=mesos state=present
+
+- name: "Install latest marathon"
+  apt: name=marathon state=present
+  when: mesos_install_mode == "master"
+
+- name: Mesos default config file
+  template: src=mesos.j2 dest=/etc/default/mesos
+
+# Need to make this shit not change everytime ansible runs
+
+- name: Install Mesos python bindings
+  shell: easy_install {{mesos_python_dest_file}}
+
+# == Re-enable services as necessary
+- name: Overwrite Zookeeper file
+  template: src=zk.j2 dest=/etc/mesos/zk
+
+- name: Add containerizers
+  template: src=etc/mesos-slave/containerizers.j2 dest=/etc/mesos-slave/containerizers
+  when: mesos_install_mode == "slave"
+
+- name: Add executor_registration_timeout file
+  template: src=etc/mesos-slave/executor_registration_timeout.j2 dest=/etc/mesos-slave/executor_registration_timeout
+  when: mesos_install_mode == "slave"
+
+- name: Enable mesos-master
+  service: name=mesos-master state=started enabled=yes
+  when: mesos_install_mode == "master"
+
+- name: Enable marathon on port 8080
+  service: name=marathon state=started enabled=yes
+  when: mesos_install_mode == "master"
+
+- name: Enable mesos-slave
+  service: name=mesos-slave state=started enabled=yes
+  when: mesos_install_mode == "slave"

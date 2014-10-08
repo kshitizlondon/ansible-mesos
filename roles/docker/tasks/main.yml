@@ -1,0 +1,20 @@
+---
+
+- name: "Copy the apt source"
+  shell: sh -c "echo deb http://get.docker.io/ubuntu docker main > /etc/apt/sources.list.d/docker.list"
+  args:
+    creates: /etc/apt/sources.list.d/docker.list
+  register: aptsource_installed
+
+- debug: msg="{{ aptsource_installed }}"
+
+- name: "Get the docker apt-key"
+  shell: wget -qO- https://get.docker.io/gpg | sudo apt-key add -
+  when: aptsource_installed.changed
+
+- name: "run an apt-get update"
+  apt: update_cache=yes 
+  when: aptsource_installed.changed
+
+- name: "Install latest Docker"
+  apt: name=lxc-docker state=present

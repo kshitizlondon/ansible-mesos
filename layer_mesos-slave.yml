@@ -1,0 +1,11 @@
+---
+
+- name: LAYER - Mesos-slave
+  hosts:
+    - tag_layer_mesos-slave
+    - local # for ansible-pull only
+  sudo: yes
+  roles:
+    - mesos
+  vars:
+    - mesos_install_mode: "slave"  
