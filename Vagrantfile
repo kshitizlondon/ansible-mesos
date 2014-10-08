@@ -34,9 +34,7 @@ Vagrant.configure("2") do |config|
         ansible.limit = 'all,localhost'
         ansible.extra_vars = {
           app_user: "vagrant",
-          app_bot_name: `whoami | xargs echo -n`,
-          bot_master_internal_address: master_ip,
-          chamisul_internal_address: chamisul_ip
+          app_bot_name: `whoami | xargs echo -n`
         }
         #ansible.verbose = "vvvv"
       end
